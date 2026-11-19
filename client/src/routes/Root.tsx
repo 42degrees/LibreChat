@@ -187,7 +187,11 @@ function RootLayout() {
             <AgentsMapContext.Provider value={agentsMap}>
               <PromptGroupsProvider>
                 <Banner onHeightChange={setBannerHeight} />
-                <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
+                {/* --app-shell-height lets a host layout (header, rail) reserve space; unset, it is the full viewport. */}
+                <div
+                  className="flex"
+                  style={{ height: `calc(var(--app-shell-height, 100dvh) - ${bannerHeight}px)` }}
+                >
                   <div
                     className="relative z-0 flex h-full w-full overflow-hidden"
                     /** Drawer width also defines the uncovered dismiss strip. */
