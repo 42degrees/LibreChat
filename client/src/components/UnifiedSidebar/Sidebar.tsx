@@ -1,5 +1,8 @@
 import { memo } from 'react';
 import type { NavLink } from '~/common';
+import useSidebarLayout, { useSidebarToolOpen } from '~/hooks/Nav/useSidebarLayout';
+import CombinedColumn, { ToolPanelHeader } from './CombinedColumn';
+import { DEFAULT_PANEL } from '~/Providers/ActivePanelContext';
 import { isRtlElement } from '~/hooks/Nav/useDirection';
 import SidePanelNav from '~/components/SidePanel/Nav';
 import ExpandedPanel from './ExpandedPanel';
@@ -30,17 +33,36 @@ function Sidebar({
   onResizeStart: (e: React.MouseEvent<HTMLElement>) => void;
   onResizeKeyboard: (direction: 'shrink' | 'grow') => void;
 }) {
+  /** Combined layout (a Settings choice, or `interface.sidebarLayout`): while expanded, the first
+   *  container holds labeled commands and the chat list instead of the icon rail, and the
+   *  panel container shows only tools, collapsing to nothing when none is open. */
+  const combined = useSidebarLayout() === 'combined' && expanded;
+  const toolOpen = useSidebarToolOpen(links) && combined;
+  const ChatsPanel = links.find((link) => link.id === DEFAULT_PANEL)?.Component;
+
   return (
     <>
       <div className="flex h-full w-full overflow-hidden">
-        <ExpandedPanel
-          links={links}
-          expanded={expanded}
-          onCollapse={onCollapse}
-          onExpand={onExpand}
-          onLeaveInsights={onLeaveInsights}
-          switchToHistory={switchToHistory}
-        />
+        {combined ? (
+          <CombinedColumn
+            links={links}
+            width={width}
+            onCollapse={onCollapse}
+            onLeaveInsights={onLeaveInsights}
+            switchToHistory={switchToHistory}
+          >
+            {ChatsPanel && <ChatsPanel />}
+          </CombinedColumn>
+        ) : (
+          <ExpandedPanel
+            links={links}
+            expanded={expanded}
+            onCollapse={onCollapse}
+            onExpand={onExpand}
+            onLeaveInsights={onLeaveInsights}
+            switchToHistory={switchToHistory}
+          />
+        )}
         <nav
           className={cn(
             /** The resize separator at the inline end is transparent until hovered, so
@@ -49,11 +71,14 @@ function Sidebar({
              *  own and the boundary has to be a line in every theme. */
             'border-border-light bg-surface-sidebar min-h-0 flex-1 overflow-hidden border-e',
             expanded ? 'opacity-100' : 'pointer-events-none opacity-0',
+            combined && !toolOpen && 'hidden',
+            toolOpen && 'flex flex-col',
           )}
           style={{ transition: expanded ? 'opacity 200ms ease 80ms' : 'opacity 150ms ease' }}
           aria-hidden={!expanded}
         >
-          <SidePanelNav links={links} />
+          {toolOpen && <ToolPanelHeader links={links} />}
+          {(!combined || toolOpen) && <SidePanelNav links={links} />}
         </nav>
       </div>
       <div
@@ -67,6 +92,8 @@ function Sidebar({
         className={cn(
           'hover:bg-border-medium active:bg-border-heavy absolute inset-e-0 top-0 z-10 h-full w-1 cursor-col-resize transition-colors',
           expanded ? 'opacity-100' : 'pointer-events-none opacity-0',
+          /** With a tool open the outer edge belongs to the tool, not the column it sizes. */
+          toolOpen && 'hidden',
         )}
         style={{ transition: expanded ? 'opacity 200ms ease 80ms' : 'opacity 150ms ease' }}
         onMouseDown={onResizeStart}

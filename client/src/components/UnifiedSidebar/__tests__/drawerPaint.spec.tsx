@@ -30,6 +30,12 @@ jest.mock('~/hooks/Nav/useSidebarState', () => ({
   default: () => mockSidebarState,
 }));
 
+jest.mock('~/hooks/Nav/useSidebarLayout', () => ({
+  __esModule: true,
+  default: () => 'rail',
+  useSidebarToolOpen: () => false,
+}));
+
 jest.mock('~/hooks/Nav/useSidebarToggle', () => ({
   __esModule: true,
   default: () => ({ setSidebarOpen: jest.fn(), toggleSidebar: jest.fn() }),

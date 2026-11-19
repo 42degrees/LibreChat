@@ -3555,6 +3555,11 @@ export const interfaceSchema = z
     webSearch: z.boolean().optional(),
     contextUsage: z.boolean().optional(),
     contextCost: z.boolean().optional(),
+    /** Desktop sidebar layout. `rail` (default): an icon rail beside the active panel.
+     *  `combined`: when expanded, one column with labeled navigation rows above the active
+     *  panel (Projects and Chats by default) and the account menu at the foot; collapsed, the
+     *  icon rail as usual. */
+    sidebarLayout: z.enum(['rail', 'combined']).optional(),
     /** Opening the artifacts pane in its own browser window. Enabled by
      *  default; a deployment that cannot use popups can turn it off and keep
      *  the docked pane. */
@@ -3809,6 +3814,7 @@ export const interfaceSchema = z
     webSearch: true,
     contextUsage: true,
     contextCost: false,
+    sidebarLayout: 'rail',
     artifactUndocking: true,
     sideChat: true,
     sessionRail: true,

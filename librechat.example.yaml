@@ -330,6 +330,11 @@ interface:
   # List a conversation's subagents and background tasks in a rail beside the chat, opened
   # from the chat header. Set false to list them in a header popover instead. Default: true.
   sessionRail: true
+  # Desktop sidebar layout (default: rail). 'rail' keeps the icon rail beside the active panel.
+  # 'combined' replaces the rail, while the sidebar is expanded, with a column of labeled
+  # commands above the chat list, and opens a tool in a panel beside it. Each person can
+  # override this in Settings.
+  # sidebarLayout: rail
   # Ask each viewer before loading Google Tag Manager (ANALYTICS_GTM_ID).
   # Set false when the deployment settles consent itself, e.g. internal use. Default: true.
   # analyticsConsent: true

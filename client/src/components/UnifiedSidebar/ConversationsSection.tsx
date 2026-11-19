@@ -32,6 +32,7 @@ import useDrawerViewport from '~/hooks/Nav/useDrawerViewport';
 import useSidebarToggle from '~/hooks/Nav/useSidebarToggle';
 import { Conversations } from '~/components/Conversations';
 import { cn, collectPinnedConversations } from '~/utils';
+import { useSidebarScrollHeader } from './scrollHeader';
 import SearchBar from '~/components/Nav/SearchBar';
 import store from '~/store';
 
@@ -39,6 +40,7 @@ const chatsHeaderTrailing = <ChatFilterMenu />;
 
 const ConversationsSection = memo(() => {
   const localize = useLocalize();
+  const scrollHeader = useSidebarScrollHeader();
   const isSmallScreen = useDrawerViewport();
   const { setSidebarOpen } = useSidebarToggle();
   const { isAuthenticated } = useAuthContext();
@@ -240,6 +242,7 @@ const ConversationsSection = memo(() => {
             {/* `min-h-full` keeps the sections filling a tall sidebar, so the chats
             list still claims the space below them when there is little to show. */}
             <div ref={setScrollContent} className="flex min-h-full flex-col">
+              {scrollHeader}
               {!search.query && (
                 <ProjectsSection toggleNav={toggleNav} isAuthenticated={isAuthenticated} />
               )}

@@ -1,5 +1,9 @@
 export const COLLAPSED_WIDTH = 52;
 export const EXPANDED_MIN = 362;
+/** The narrowest expanded sidebar under `interface.sidebarLayout: combined`, which has no rail. */
+export const COMBINED_EXPANDED_MIN = 240;
+/** A tool's width beside the combined column: the rail layout's panel at its narrowest. */
+export const COMBINED_TOOL_WIDTH = EXPANDED_MIN - COLLAPSED_WIDTH;
 
 /**
  * How much of the viewport the mobile drawer covers.

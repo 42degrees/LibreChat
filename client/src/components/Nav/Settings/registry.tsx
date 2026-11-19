@@ -24,6 +24,7 @@ import {
 } from '../SettingsTabs/Speech/STT';
 import { EngineSTTSetting, EngineTTSSetting, SpeechInputPresetSetting } from './SpeechControls';
 import EnableTwoFactorItem from '../SettingsTabs/Account/TwoFactorAuthentication';
+import SidebarLayoutSelector from '../SettingsTabs/General/SidebarLayoutSelector';
 import LangfuseConnection from '../SettingsTabs/Integrations/LangfuseConnection';
 import ClockFormatSelector from '../SettingsTabs/General/ClockFormatSelector';
 import ImportConversations from '../SettingsTabs/Data/ImportConversations';
@@ -136,6 +137,14 @@ export const registry: SettingEntry[] = [
     Component: WeekStartSelector,
   },
   // General · Layout
+  {
+    id: 'sidebarLayout',
+    tab: GENERAL,
+    section: 'layout',
+    labelKey: 'com_nav_sidebar_layout',
+    keywords: ['sidebar', 'rail', 'navigation', 'labels', 'combined', 'menu'],
+    Component: SidebarLayoutSelector,
+  },
   {
     id: 'maximizeChatSpace',
     tab: GENERAL,

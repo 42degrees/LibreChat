@@ -105,6 +105,7 @@ export async function loadDefaultInterface({
     sessionRail: interfaceConfig?.sessionRail ?? defaults.sessionRail,
     analyticsConsent: interfaceConfig?.analyticsConsent,
     contextCost: interfaceConfig?.contextCost ?? defaults.contextCost,
+    sidebarLayout: interfaceConfig?.sidebarLayout ?? defaults.sidebarLayout,
     feedback: interfaceConfig?.feedback ?? defaults.feedback,
     currency: interfaceConfig?.currency ?? defaults.currency,
     theme: interfaceConfig?.theme,

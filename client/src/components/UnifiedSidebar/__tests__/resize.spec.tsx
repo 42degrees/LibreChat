@@ -8,6 +8,12 @@ jest.mock('~/components/SidePanel/Nav', () => ({
   default: () => null,
 }));
 
+jest.mock('~/hooks/Nav/useSidebarLayout', () => ({
+  __esModule: true,
+  default: () => 'rail',
+  useSidebarToolOpen: () => false,
+}));
+
 jest.mock('../ExpandedPanel', () => ({
   __esModule: true,
   default: () => null,

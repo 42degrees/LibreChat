@@ -9,6 +9,8 @@ import type { ChatFormValues } from '~/common';
 import {
   COLLAPSED_WIDTH,
   EXPANDED_MIN,
+  COMBINED_EXPANDED_MIN,
+  COMBINED_TOOL_WIDTH,
   TRANSITION_MS,
   EASING,
   MOBILE_DRAWER_TRANSITION,
@@ -17,6 +19,7 @@ import {
   MOBILE_DRAWER_WIDTH,
   DRAWER_UNPAINTED,
 } from './constants';
+import useSidebarLayout, { useSidebarToolOpen } from '~/hooks/Nav/useSidebarLayout';
 import { filesDialogTriggerAtom, showFilesDialogAtom } from '~/store/filesDialog';
 import { MobileHeader, MobileBottomBar, MobileShortcutTargets } from './mobile';
 import AgentMarketplaceButton from '~/components/Nav/AgentMarketplaceButton';
@@ -33,7 +36,9 @@ import { cn } from '~/utils';
 
 function getInitialWidth(): number {
   const saved = localStorage.getItem('side:width');
-  return saved ? Math.max(Number(saved), EXPANDED_MIN) : EXPANDED_MIN;
+  /** The floor is the narrowest any layout allows: the layout is not known yet on the first
+   *  render, and the aside's own min-width keeps the rail layout at EXPANDED_MIN. */
+  return saved ? Math.max(Number(saved), COMBINED_EXPANDED_MIN) : EXPANDED_MIN;
 }
 
 /**
@@ -71,12 +76,18 @@ function UnifiedSidebar({
   const [sidebarWidth, setSidebarWidth] = useState(getInitialWidth);
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const remScale = useRemScale();
+  /** The combined layout has no rail beside its panel, so it can be narrower. */
+  const isCombined = useSidebarLayout() === 'combined';
+  const expandedMin = isCombined ? COMBINED_EXPANDED_MIN : EXPANDED_MIN;
   const [isResizing, setIsResizing] = useState(false);
   const resizeHandlers = useRef<{ move: (e: MouseEvent) => void; up: () => void } | null>(null);
 
   const links = useUnifiedSidebarLinks();
   const isInsightsRoute = location.pathname.startsWith('/insights');
   const panelExpanded = expanded && !isInsightsRoute;
+  /** In the combined layout an open tool sits beside the column, so the sidebar grows by its
+   *  width; the column keeps its own width and its own 40% cap. */
+  const toolWidth = useSidebarToolOpen(links) && panelExpanded ? COMBINED_TOOL_WIDTH : 0;
 
   /** The aside's max width is a viewport percentage, so the announced range has to track
    *  the viewport rather than a render-time snapshot of it. */
@@ -88,7 +99,7 @@ function UnifiedSidebar({
 
   /** Keep the handle's announced range in the same baseline units as stored widths. */
   const resizeMax = (viewportWidth * 0.4) / remScale;
-  const resizeMin = Math.min(EXPANDED_MIN, resizeMax);
+  const resizeMin = Math.min(expandedMin, resizeMax);
   const resizeNow = panelExpanded
     ? Math.min(Math.max(sidebarWidth, resizeMin), resizeMax)
     : COLLAPSED_WIDTH;
@@ -121,7 +132,7 @@ function UnifiedSidebar({
       document.body.style.userSelect = 'none';
       const maxWidth = (window.innerWidth * 0.4) / remScale;
       /** The scaled minimum can exceed the viewport cap, so it yields to the cap. */
-      const minWidth = Math.min(EXPANDED_MIN, maxWidth);
+      const minWidth = Math.min(expandedMin, maxWidth);
       const measure = createResizeMeasure(event.currentTarget);
       let rafId: number | null = null;
 
@@ -156,7 +167,7 @@ function UnifiedSidebar({
       document.addEventListener('mousemove', move);
       document.addEventListener('mouseup', up);
     },
-    [remScale],
+    [remScale, expandedMin],
   );
 
   const handleResizeKeyboard = useCallback(
@@ -168,13 +179,13 @@ function UnifiedSidebar({
         const current = Math.min(w, maxWidth);
         const next =
           direction === 'shrink'
-            ? Math.max(current - 20, Math.min(EXPANDED_MIN, maxWidth))
+            ? Math.max(current - 20, Math.min(expandedMin, maxWidth))
             : Math.min(current + 20, maxWidth);
         localStorage.setItem('side:width', String(Math.round(next)));
         return next;
       });
     },
-    [remScale],
+    [remScale, expandedMin],
   );
 
   useEffect(() => {
@@ -292,11 +303,13 @@ function UnifiedSidebar({
         <aside
           className="relative flex h-full shrink-0 overflow-hidden"
           style={{
-            width: pxToRem(panelExpanded ? sidebarWidth : COLLAPSED_WIDTH),
+            width: pxToRem(panelExpanded ? sidebarWidth + toolWidth : COLLAPSED_WIDTH),
             minWidth: panelExpanded
-              ? `min(${pxToRem(EXPANDED_MIN)}, 40%)`
+              ? `calc(min(${pxToRem(expandedMin)}, 40%) + ${pxToRem(toolWidth)})`
               : pxToRem(COLLAPSED_WIDTH),
-            maxWidth: panelExpanded ? '40%' : pxToRem(COLLAPSED_WIDTH),
+            maxWidth: panelExpanded
+              ? `calc(40% + ${pxToRem(toolWidth)})`
+              : pxToRem(COLLAPSED_WIDTH),
             transition: isResizing
               ? 'none'
               : `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`,
